@@ -16,6 +16,9 @@ async fn hello() -> impl Responder{
 async fn rpc_webhook(req_body:web::Json<Value>) -> impl Responder{
     let json_data = &req_body;
 
+    
+    println!("JSON data as string: {}", json_data.to_string());
+
     if let Some(description) = json_data[0]["description"].as_str() {
         println!("Description: {}", description);
     } else {
