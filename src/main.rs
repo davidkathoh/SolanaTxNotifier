@@ -1,7 +1,8 @@
 use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder, ResponseError, Result};
 use std::env;
 use  dotenv::dotenv;
-use teloxide::{dispatching::dialogue::GetChatId, prelude::*, types::UpdateKind};
+use teloxide::{ prelude::*,};
+use serde_json::Value;
 
 
 #[get("/")]
@@ -12,8 +13,11 @@ async fn hello() -> impl Responder{
 }
 
 #[post("/rpc")]
-async fn rpc_webhook(req_body:String) -> impl Responder{
-    HttpResponse::Ok().body(req_body)
+async fn rpc_webhook(req_body:web::Json<Value>) -> impl Responder{
+    let json_data = &req_body;
+
+    println!("Received JSON data: {:?}", json_data);
+    HttpResponse::Ok().body("ok")
 }
 #[post("/telegram")]
 async fn telegram_webhook(body: web::Json<Update>,bot:web::Data<Bot>) -> impl Responder{
@@ -22,12 +26,6 @@ async fn telegram_webhook(body: web::Json<Update>,bot:web::Data<Bot>) -> impl Re
     println!("Received chat id: {:?}",chat_id.0);
     let _ = bot.send_message(chat_id, "gdg").await;
     println!("message sent");
-   
-   
-    
-      
-
-    
     HttpResponse::Ok()
 }
 #[actix_web::main]
