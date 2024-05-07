@@ -19,8 +19,13 @@ async fn rpc_webhook(req_body:String) -> impl Responder{
 async fn telegram_webhook(body: web::Json<Update>,bot:web::Data<Bot>) -> impl Responder{
     println!("Received update: {:?}",body.id);
     let update = body.0;
-        let chat_id = update.chat_id().unwrap();
-        let _ = bot.send_message(chat_id, "Hello");
+    let chat_id = update.chat_id().unwrap();
+    println!("Received chat id: {:?}",chat_id.0);
+   let _ = bot.send_message(chat_id, "Hello world");
+   
+   
+    
+      
 
     
     HttpResponse::Ok()
