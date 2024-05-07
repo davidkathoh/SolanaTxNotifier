@@ -22,6 +22,7 @@ async fn telegram_webhook(body: web::Json<Update>,bot:web::Data<Bot>) -> impl Re
     let chat_id = update.chat_id().unwrap();
     println!("Received chat id: {:?}",chat_id.0);
    let _ = bot.send_message(chat_id, "Hello world");
+   print!("message sent");
    
    
     
