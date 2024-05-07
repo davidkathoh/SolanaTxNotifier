@@ -13,12 +13,13 @@ async fn hello() -> impl Responder{
 }
 
 #[post("/rpc")]
-async fn rpc_webhook(req_body:web::Json<Value>) -> impl Responder{
+async fn rpc_webhook(req_body:web::Json<Value>,bot:web::Data<Bot>) -> impl Responder{
     let json_data = &req_body;
 
     
     println!("JSON data as string: {}", json_data.to_string());
 
+    bot.send_message(ChatId(5331817989), json_data.to_string()).await;
     if let Some(description) = json_data[0]["description"].as_str() {
         println!("Description: {}", description);
     } else {
