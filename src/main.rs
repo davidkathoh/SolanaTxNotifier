@@ -16,7 +16,13 @@ async fn hello() -> impl Responder{
 async fn rpc_webhook(req_body:web::Json<Value>) -> impl Responder{
     let json_data = &req_body;
 
-    println!("Received JSON data: {:?}", json_data);
+    if let Some(description) = json_data[0]["description"].as_str() {
+        println!("Description: {}", description);
+    } else {
+        println!("Description not found or not a string");
+    }
+
+    
     HttpResponse::Ok().body("ok")
 }
 #[post("/telegram")]
