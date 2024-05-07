@@ -1,8 +1,7 @@
-use actix_web::{get,post,web,App,HttpResponse,HttpServer,Responder, Result};
-use core::sync;
+use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder, ResponseError, Result};
 use std::env;
 use  dotenv::dotenv;
-use teloxide::prelude::*;
+use teloxide::{prelude::*};
 
 
 #[get("/")]
@@ -17,9 +16,9 @@ async fn rpc_webhook(req_body:String) -> impl Responder{
     HttpResponse::Ok().body(req_body)
 }
 #[post("/telegram")]
-async fn telegram_webhook(update:teloxide::types::Update,) -> Result<HttpResponse,Box<dyn std::error::Error + Send + sync>>{
-    println!("Received update: {:?}",update);
-    Ok(HttpResponse::Ok().finish())
+async fn telegram_webhook(body: web::Json<Update>) -> impl Responder{
+    println!("Received update: {:?}",body.id);
+    HttpResponse::Ok()
 }
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -30,6 +29,7 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(||{
         App::new()
+
         .service(hello)
         .service(rpc_webhook)
         .service(telegram_webhook)
