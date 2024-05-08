@@ -6,9 +6,10 @@ use serde_json::Value;
 
 
 #[get("/")]
-async fn hello() -> impl Responder{
+async fn hello(bot:web::Data<Bot>) -> impl Responder{
 
-
+    let user_id = UserId(5331817989);
+    let _ = bot.send_message(ChatId::from(user_id),"Hello world").await;
     HttpResponse::Ok().body("Hello world")
 }
 
@@ -19,7 +20,7 @@ async fn rpc_webhook(req_body:web::Json<Value>,bot:web::Data<Bot>) -> impl Respo
     
     println!("JSON data as string: {}", json_data.to_string());
 
-    bot.send_message(ChatId(5331817989), json_data.to_string()).await;
+    let _ = bot.send_message(ChatId(5331817989), json_data.to_string()).await;
     if let Some(description) = json_data[0]["description"].as_str() {
         println!("Description: {}", description);
     } else {
