@@ -23,6 +23,7 @@ async fn rpc_webhook(req_body:web::Json<Value>,bot:web::Data<Bot>) -> impl Respo
     let _ = bot.send_message(ChatId::from(UserId(5331817989)), json_data.to_string()).await;
     if let Some(description) = json_data[0]["description"].as_str() {
         println!("Description: {}", description);
+        let _ = bot.send_message(ChatId::from(UserId(5331817989)), description).await;
     } else {
         println!("Description not found or not a string");
     }
