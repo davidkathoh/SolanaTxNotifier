@@ -16,6 +16,8 @@ async fn hello(bot:web::Data<Bot>, account:web::Data<TrackedAddress>) -> impl Re
     let mut acc_ = account.account.lock().unwrap();
      if let Some(chat_ids) = acc_.get_mut("0x") {
         println!("John's numbers: {:?}", chat_ids);
+        let _ = bot.send_message(ChatId::from(user_id),chat_ids).await;
+
         let rnd_id:u64 = rand::thread_rng().gen();
         chat_ids.push(rnd_id);
     }else{
