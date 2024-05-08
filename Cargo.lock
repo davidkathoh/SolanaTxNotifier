@@ -10,6 +10,7 @@ dependencies = [
  "dotenv",
  "log",
  "pretty_env_logger",
+ "rand",
  "serde",
  "serde_json",
  "teloxide",
