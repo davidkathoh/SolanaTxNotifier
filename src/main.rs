@@ -1,29 +1,28 @@
 use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder, ResponseError, Result};
-use std::{collections::HashMap, env};
+use std::{collections::HashMap, default};
 use  dotenv::dotenv;
-use teloxide::{ prelude::*,};
+use teloxide::{ prelude::*, types::UpdateKind};
 use serde_json::Value;
 use std::sync::Mutex;
-use rand::Rng;
 
 
 #[get("/")]
-async fn hello(bot:web::Data<Bot>, account:web::Data<TrackedAddress>) -> impl Responder{
+async fn hello(bot:web::Data<Bot>, _account:web::Data<TrackedAddress>) -> impl Responder{
 
     let user_id = UserId(5331817989);
     let _ = bot.send_message(ChatId::from(user_id),"Hello world").await;
 
-    let mut acc_ = account.account.lock().unwrap();
-     if let Some(chat_ids) = acc_.get_mut("0x") {
+    // let mut acc_ = account.account.lock().unwrap();
+    //  if let Some(chat_ids) = acc_.get_mut("0x") {
         
-        println!("John's numbers: {:?}", chat_ids);
-        let _ = bot.send_message(ChatId::from(user_id),chat_ids.iter().map(|&id| id.to_string()).collect::<Vec<String>>().join(",")).await;
+    //     println!("John's numbers: {:?}", chat_ids);
+    //     let _ = bot.send_message(ChatId::from(user_id),chat_ids.iter().map(|&id| id.to_string()).collect::<Vec<String>>().join(",")).await;
 
-        let rnd_id:u64 = rand::thread_rng().gen();
-        chat_ids.push(rnd_id);
-    }else{
-    acc_.insert("0x".to_string(), vec![34,56]);
-    }
+    //     let rnd_id:u64 = rand::thread_rng().gen();
+    //     chat_ids.push(rnd_id);
+    // }else{
+    // acc_.insert("0x".to_string(), vec![34,56]);
+    // }
     
     HttpResponse::Ok().body("Hello world")
 }
@@ -53,12 +52,56 @@ async fn telegram_webhook(body: web::Json<Update>,bot:web::Data<Bot>) -> impl Re
     println!("Received chat id: {:?}",chat_id.0);
     let _ = bot.send_message(chat_id, "gdg").await;
     println!("message sent");
+    
+
+    match update.kind {
+        UpdateKind::Message(message)=>{
+
+            if let Some(text) = message.text() {
+                // Process the text message
+                println!("Received text: {}", text);
+                let _ = bot.send_message(chat_id, text).await;
+            } else {
+                println!("Received message without text.");
+            }
+            
+        }
+        // UpdateKind::EditedMessage(_) => todo!(),
+        // UpdateKind::ChannelPost(_) => todo!(),
+        // UpdateKind::EditedChannelPost(_) => todo!(),
+        // UpdateKind::InlineQuery(_) => todo!(),
+        // UpdateKind::ChosenInlineResult(_) => todo!(),
+        // UpdateKind::CallbackQuery(_) => todo!(),
+        // UpdateKind::ShippingQuery(_) => todo!(),
+        // UpdateKind::PreCheckoutQuery(_) => todo!(),
+        // UpdateKind::Poll(_) => todo!(),
+        // UpdateKind::PollAnswer(_) => todo!(),
+        // UpdateKind::MyChatMember(_) => todo!(),
+        // UpdateKind::ChatMember(_) => todo!(),
+        // UpdateKind::ChatJoinRequest(_) => todo!(),
+        // UpdateKind::Error(_) => todo!(),
+        _ => println!("Received update other than a message."),
+    }
+    // if let Some(message) = update {
+    //     UpdateKind::Message(())
+    //     if let Some(text) = message.text {
+    //         // Process the text message
+    //         println!("Received text: {}", text);
+    //     } else {
+    //         println!("Received message without text.");
+    //     }
+    // } else {
+    //     println!("Received update without a message.");
+    // }
     HttpResponse::Ok()
 }
 
 struct TrackedAddress{
     account:Mutex<HashMap<String,Vec<u64>>>,
 }
+
+
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
 
@@ -66,6 +109,8 @@ async fn main() -> std::io::Result<()> {
     pretty_env_logger::init();
     let bot = Bot::from_env();
     let account = web::Data::new(TrackedAddress{account:Mutex::new(HashMap::new())});
+
+
     HttpServer::new(move||{
         App::new()
         .app_data(web::Data::new(bot.clone()))
