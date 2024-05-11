@@ -50,52 +50,51 @@ async fn telegram_webhook(body: web::Json<Update>,bot:web::Data<Bot>) -> impl Re
     let update = body.0;
     let chat_id = update.chat().unwrap().id;
     println!("Received chat id: {:?}",chat_id.0);
-    let _ = bot.send_message(chat_id, "gdg").await;
-    println!("message sent");
+   
     
-
     match update.kind {
         UpdateKind::Message(message)=>{
-
             if let Some(text) = message.text() {
                 // Process the text message
                 println!("Received text: {}", text);
+
                 let _ = bot.send_message(chat_id, text).await;
+
+            if let Some((command, args)) = teloxide::utils::command::parse_command_with_prefix("/",&text,"") {
+                match command {
+                   
+                    "address" => {
+                        let response = format!("Echo: {}", args.join(""));
+                        let _ = bot.send_message(chat_id, response).await;}
+                   
+                    "list" => {
+                        let response = "list of addresses";
+                        let _ = bot.send_message(chat_id,response).await;
+                    }
+                    _ => {}
+                }
+            }
+        
             } else {
                 println!("Received message without text.");
             }
             
         }
-        // UpdateKind::EditedMessage(_) => todo!(),
-        // UpdateKind::ChannelPost(_) => todo!(),
-        // UpdateKind::EditedChannelPost(_) => todo!(),
-        // UpdateKind::InlineQuery(_) => todo!(),
-        // UpdateKind::ChosenInlineResult(_) => todo!(),
-        // UpdateKind::CallbackQuery(_) => todo!(),
-        // UpdateKind::ShippingQuery(_) => todo!(),
-        // UpdateKind::PreCheckoutQuery(_) => todo!(),
-        // UpdateKind::Poll(_) => todo!(),
-        // UpdateKind::PollAnswer(_) => todo!(),
-        // UpdateKind::MyChatMember(_) => todo!(),
-        // UpdateKind::ChatMember(_) => todo!(),
-        // UpdateKind::ChatJoinRequest(_) => todo!(),
-        // UpdateKind::Error(_) => todo!(),
         _ => println!("Received update other than a message."),
     }
-    // if let Some(message) = update {
-    //     UpdateKind::Message(())
-    //     if let Some(text) = message.text {
-    //         // Process the text message
-    //         println!("Received text: {}", text);
-    //     } else {
-    //         println!("Received message without text.");
-    //     }
-    // } else {
-    //     println!("Received update without a message.");
-    // }
-    HttpResponse::Ok()
+
+   
+    HttpResponse::Ok().body("")
 }
 
+fn extract_text_from_command(command: &str) -> Option<&str> {
+    if let Some(text_index) = command.find(" ") {
+        let text = &command[(text_index + 1)..];
+        Some(text)
+    } else {
+        None
+    }
+}
 struct TrackedAddress{
     account:Mutex<HashMap<String,Vec<u64>>>,
 }
