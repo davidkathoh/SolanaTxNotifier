@@ -1,9 +1,12 @@
 use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder, ResponseError, Result};
+use helius::Helius;
 use std::{collections::HashMap, default};
 use  dotenv::dotenv;
 use teloxide::{ prelude::*, types::UpdateKind};
 use serde_json::Value;
 use std::sync::Mutex;
+use helius::error::HeliusError;
+use helius::types::{Cluster};
 
 
 #[get("/")]
@@ -67,7 +70,7 @@ async fn telegram_webhook(body: web::Json<Update>,bot:web::Data<Bot>,account:web
                         let response =  args.join("");
                  if let Some(telegram_ids) = acc_.get_mut(&response) {
                     telegram_ids.push(chat_id.0);
-                   
+                     add_address(response.clone()).await;
 
                    let _ = bot.send_message(chat_id, response).await;
                 }else{
@@ -106,6 +109,18 @@ fn extract_text_from_command(command: &str) -> Option<&str> {
     } else {
         None
     }
+}
+
+async fn add_address(address:String){
+    let cluster: Cluster = Cluster::Devnet;
+    let api_key =  std::env::var("HELIUS_KEY").expect("HELIUS_KEY must be set.");
+    let webhook_id = std::env::var("WEBHOOK_ID").expect("WEBHOOK_ID must be set.");
+
+    let helius: Helius = Helius::new(&api_key, cluster).unwrap();
+
+    let _ = helius.append_addresses_to_webhook(&webhook_id, &[address]).await;
+   
+  
 }
 struct TrackedAddress{
     account:Mutex<HashMap<String,Vec<i64>>>,
