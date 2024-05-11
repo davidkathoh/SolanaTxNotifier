@@ -46,7 +46,7 @@ async fn rpc_webhook(req_body:web::Json<Value>,bot:web::Data<Bot>) -> impl Respo
     HttpResponse::Ok().body("ok")
 }
 #[post("/telegram")]
-async fn telegram_webhook(body: web::Json<Update>,bot:web::Data<Bot>) -> impl Responder{
+async fn telegram_webhook(body: web::Json<Update>,bot:web::Data<Bot>,account:web::Data<TrackedAddress>) -> impl Responder{
     let update = body.0;
     let chat_id = update.chat().unwrap().id;
     println!("Received chat id: {:?}",chat_id.0);
@@ -59,17 +59,29 @@ async fn telegram_webhook(body: web::Json<Update>,bot:web::Data<Bot>) -> impl Re
                 println!("Received text: {}", text);
 
                 let _ = bot.send_message(chat_id, text).await;
-
+                let mut acc_ = account.account.lock().unwrap();
             if let Some((command, args)) = teloxide::utils::command::parse_command_with_prefix("/",&text,"") {
                 match command {
                    
                     "address" => {
-                        let response = format!("Echo: {}", args.join(""));
-                        let _ = bot.send_message(chat_id, response).await;}
+                        let response =  args.join("");
+                 if let Some(telegram_ids) = acc_.get_mut(&response) {
+                    telegram_ids.push(chat_id.0);
+                   
+
+                   let _ = bot.send_message(chat_id, response).await;
+                }else{
+                acc_.insert(response, vec![chat_id.0]);
+                }
+            }
                    
                     "list" => {
-                        let response = "list of addresses";
-                        let _ = bot.send_message(chat_id,response).await;
+                        
+                        
+                            let key_array:Vec<String> = acc_.clone().into_keys().collect();
+                            let _ = bot.send_message(chat_id,key_array.join("-")).await;
+                        
+                       
                     }
                     _ => {}
                 }
@@ -96,7 +108,7 @@ fn extract_text_from_command(command: &str) -> Option<&str> {
     }
 }
 struct TrackedAddress{
-    account:Mutex<HashMap<String,Vec<u64>>>,
+    account:Mutex<HashMap<String,Vec<i64>>>,
 }
 
 
