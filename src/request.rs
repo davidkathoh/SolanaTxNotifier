@@ -12,7 +12,7 @@ pub   async fn add_address() {
         // let  response = request.send().await;
         //let  body= response.json().await?;
 
-        println!("{:?}", response.unwrap().text().await);
+        println!("{:?}", response.unwrap().json().await);
     }
 // async fn () -> Result<(), Box<dyn std::error::Error>> {
 //     let client = reqwest::Client::builder()
