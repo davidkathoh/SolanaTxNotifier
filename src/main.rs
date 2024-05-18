@@ -65,7 +65,7 @@ async fn telegram_webhook(body: web::Json<Update>,bot:web::Data<Bot>,account:web
                             let address = args[1];
                             bot.send_message(chat_id, format!("Address provided {}",address)).await;
                         }else {
-                            bot.send_message(chat_id,format!( "No address in the comand {}",args)).await;
+                            bot.send_message(chat_id,format!( "No address in the comand {}",args.len())).await;
                         }
                  if let Some(telegram_ids) = acc_.get_mut(&response) {
                     telegram_ids.push(chat_id.0);
