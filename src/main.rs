@@ -2,6 +2,7 @@ mod request;
 
 use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder, ResponseError, Result};
 use std::{collections::HashMap, default};
+use std::env::args;
 use  dotenv::dotenv;
 use teloxide::{ prelude::*, types::UpdateKind};
 use serde_json::Value;
@@ -60,6 +61,12 @@ async fn telegram_webhook(body: web::Json<Update>,bot:web::Data<Bot>,account:web
                    
                     "address" => {
                         let response =  args.join("");
+                        if args.len()>1 {
+                            let address = args[1];
+                            bot.send_message(chat_id, format!("Address provided {}",address)).await;
+                        }else {
+                            bot.send_message(chat_id, "No address in the comand").await;
+                        }
                  if let Some(telegram_ids) = acc_.get_mut(&response) {
                     telegram_ids.push(chat_id.0);
                     // add_address(response.clone()).await;
@@ -103,17 +110,7 @@ fn extract_text_from_command(command: &str) -> Option<&str> {
     }
 }
 
-// async fn add_address(address:String){
-//     let cluster: Cluster = Cluster::Devnet;
-//     let API_KEY =  std::env::var("HELIUS_KEY").expect("HELIUS_KEY must be set.");
-//     let WEBHOOK_ID = std::env::var("WEBHOOK_ID").expect("WEBHOOK_ID must be set.");
-//
-//     let helius: Helius = Helius::new(&API_KEY, cluster).unwrap();
-//
-//     let _ = helius.append_addresses_to_webhook(&WEBHOOK_ID, &[address]).await;
-//
-//
-// }
+
 struct TrackedAddress{
     account:Mutex<HashMap<String,Vec<i64>>>,
 }
