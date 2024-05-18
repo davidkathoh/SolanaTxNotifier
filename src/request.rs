@@ -31,7 +31,7 @@ async fn get_webhook()-> Vec<String>{
     match response.status() {
         reqwest::StatusCode::OK =>{
           match response.json::<HeliusRequest>().await {
-              Ok(helius)=>println!("Success! {:?}",helius.webhookURL),
+              Ok(helius)=>println!("Success! your webhook is {:?}",helius.webhookURL),
               Err(_)=>println!("Was not able to parse the response")
           }
         }
