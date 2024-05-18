@@ -62,18 +62,12 @@ async fn telegram_webhook(body: web::Json<Update>,bot:web::Data<Bot>,account:web
                    
                     "address" => {
                         let response =  args.join(" ");
-                        if args.len()>1 {
-                            let address = args[1];
-                            bot.send_message(chat_id, format!("Address provided {}",address)).await;
-                        }else {
-                            bot.send_message(chat_id,format!( "No address in the comand {}",response)).await;
-                        }
                  if let Some(telegram_ids) = acc_.get_mut(&response) {
                     telegram_ids.push(chat_id.0);
 
                     // add_address(response.clone()).await;
 
-                   let _ = bot.send_message(chat_id, response).await;
+                   bot.send_message(chat_id, response).await;
                 }else{
                 acc_.insert(response, vec![chat_id.0]);
                 }
@@ -83,7 +77,7 @@ async fn telegram_webhook(body: web::Json<Update>,bot:web::Data<Bot>,account:web
                         
                         
                             let key_array:Vec<String> = acc_.clone().into_keys().collect();
-                            let _ = bot.send_message(chat_id,key_array.join("-")).await;
+                            let _ = bot.send_message(chat_id,key_array.join("\n")).await;
                         
                        
                     }
