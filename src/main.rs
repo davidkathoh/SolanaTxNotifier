@@ -60,7 +60,7 @@ async fn telegram_webhook(body: web::Json<Update>,bot:web::Data<Bot>,account:web
                 match command {
                    
                     "address" => {
-                        let response =  args;
+                        let response =  args.join(" ");
                         if args.len()>1 {
                             let address = args[1];
                             bot.send_message(chat_id, format!("Address provided {}",address)).await;
