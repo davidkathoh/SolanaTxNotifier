@@ -1,27 +1,28 @@
-use serde::{Deserialize,Serialize};
+use reqwest::header::CONTENT_TYPE;
+use serde::{Deserialize, Serialize};
 
 
 
-pub   async fn add_address() {
+pub   async fn add_address(address:String) {
 
-    get_webhook().await;
-    // let api_key: String = std::env::var("HELIUS_KEY").expect("HELIUS_KEY must be set.");
-    // let webhook_id: String = std::env::var("WEBHOOK_ID").expect("webhook_id must be set.");
-    // let url = format!("https://api.helius.xyz/v0/webhooks/{}?api-key={}", webhook_id, api_key);
-    // let mut addresses = get_webhook().await;
-    // addresses.push(address);
-    // let client  = reqwest::Client::new();
-    // let response = client
-    //     .post(url)
-    //     .header()
-    //     .body()
-    //     .send()
-    //     .await
-    //     .unwrap();
-    // println!("Success! {:?}",response)
+    let mut helius = get_webhook().await.unwrap();
+    helius.accountAddresses.push(address);
+
+    let api_key: String = std::env::var("HELIUS_KEY").expect("HELIUS_KEY must be set.");
+    let webhook_id: String = std::env::var("WEBHOOK_ID").expect("webhook_id must be set.");
+    let url = format!("https://api.helius.xyz/v0/webhooks/{}?api-key={}", webhook_id, api_key);
+    let client  = reqwest::Client::new();
+    let response = client
+        .post(url)
+        .header(CONTENT_TYPE,"application/json")
+        .json(&helius)
+        .send()
+        .await
+        .unwrap();
+    println!("Success! {:?}",response)
     }
 
-async fn get_webhook()-> Vec<String>{
+async fn get_webhook()-> Result<HeliusRequest,String>{
     let api_key: String = std::env::var("HELIUS_KEY").expect("HELIUS_KEY must be set.");
     let webhook_id: String = std::env::var("WEBHOOK_ID").expect("webhook_id must be set.");
     let url = format!("https://api.helius.xyz/v0/webhooks/{}?api-key={}", webhook_id, api_key);
@@ -30,24 +31,14 @@ async fn get_webhook()-> Vec<String>{
 
     match response.status() {
         reqwest::StatusCode::OK =>{
-          match response.json::<HeliusRequest>().await {
-              Ok(helius)=>println!("Success! your webhook is {:?}",helius.webhookURL),
-              Err(_)=>println!("Was not able to parse the response")
-          }
+            Ok(response.json::<HeliusRequest>().await.unwrap())
         }
         other=>{
-            panic!("Something unexpected happened: {:?}",other)
+            Err(format!("Something unexpected happened: {:?}",other))
         }
 
-    };
+    }
 
-    let v:Vec<String> = vec!["string".to_string()];
-    v
-
-    // let  response = request.send().await;
-    //let  body= response.json().await?;
-
-    //println!("{:?}", response.unwrap().text().await)
 }
 // async fn () -> Result<(), Box<dyn std::error::Error>> {
 //     let client = reqwest::Client::builder()
