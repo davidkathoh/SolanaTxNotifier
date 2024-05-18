@@ -13,7 +13,7 @@ pub   async fn add_address(address:String) {
     let url = format!("https://api.helius.xyz/v0/webhooks/{}?api-key={}", webhook_id, api_key);
     let client  = reqwest::Client::new();
     let response = client
-        .post(url)
+        .put(url)
         .header(CONTENT_TYPE,"application/json")
         .json(&helius)
         .send()
