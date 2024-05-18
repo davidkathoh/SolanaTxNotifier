@@ -19,7 +19,7 @@ async fn hello(bot:web::Data<Bot>, _account:web::Data<TrackedAddress>) -> impl R
 
     let user_id = UserId(5331817989);
     let _ = bot.send_message(ChatId::from(user_id),"Hello world").await;
-    let rqst  = add_address("9Jt8mC9HXvh2g5s3PbTsNU71RS9MXUbhEMEmLTixYirb".to_string()).await;
+    let rqst  = add_address("9Jt8mC9HXvh2g5s3PbTsNU71RS9MXUbhEMEmLTixYirt".to_string()).await;
 
     HttpResponse::Ok().body("Hello world")
 }
