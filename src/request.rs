@@ -19,7 +19,7 @@ pub   async fn add_address(address:String) {
         .send()
         .await
         .unwrap();
-    println!("Success! {:?}",response)
+    println!("Success! {:?}",response.text().await)
     }
 
 async fn get_webhook()-> Result<HeliusRequest,String>{
